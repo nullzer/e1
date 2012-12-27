@@ -18,7 +18,7 @@ function e1_entity_info(){
         'access callback' => 'access content',
         'module' => 'e1',
     );
-    return $entities;e1
+    return $entities;
 }
 
 function e1_get_originalId($entity_type, $entity){
