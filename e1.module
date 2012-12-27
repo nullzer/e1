@@ -1,0 +1,26 @@
+<?php 
+function e1_entity_info(){
+    $entities = array();
+    $entities['e1_realty'] = array(
+        'label' => t('e1.realty Entity'),
+        'entity class' => 'Entity',
+        'controller class' => 'EntityAPIController',
+        'views controller class' => 'EntityDefaultViewsController',
+        'base table' => 'e1_queue',
+        'fieldable' => FALSE,
+        'entity keys' => array(
+            'id' => 'e1rid',
+            'label' => 'e1. Realty ID',
+        ),
+        'bundles' => array(),
+        'label callback' => 'e1_get_originalId', 
+        'uri callback' => 'e1_uri',
+        'access callback' => 'access content',
+        'module' => 'e1',
+    );
+    return $entities;e1
+}
+
+function e1_get_originalId($entity_type, $entity){
+    return $entity->e1id;
+}

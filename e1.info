@@ -1,0 +1,9 @@
+name = E1.realty
+description = Import from e1
+php = 5.0
+core = 7.x
+package = Spider
+dependencies[] = entity
+dependencies[] = token
+dependencies[] = realty
+ 

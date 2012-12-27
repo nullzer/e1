@@ -1,0 +1,50 @@
+<?php 
+
+function e1_schema(){
+
+  $schema['e1_queue'] = array(
+                            'description' => 'Queue of realties',
+                            'fields' => array(
+                                'e1rid'                    => array(
+                                    'description'       => 'Primary Key',
+                                    'type'              => 'serial',
+                                    'size'              => 'big',
+                                    'not null'          => TRUE,
+                                ),
+                                'created' => array(
+                                    'description'       => 'Время создания объекта',
+                                    'type'              => 'int',
+                                    'size'              => 'big',
+                                    'unsigned'          => TRUE,
+                                    'not null' => TRUE,
+                                ),
+                                'e1id' => array(
+                                    'description' => 'E1 id',
+                                    'type' => 'int',
+                                    'size' => 'big',
+                                    'unsigned' => TRUE,
+                                    'not null' => TRUE,
+                                ),
+                                'url'           => array(
+                                    'description' => 'Ссыль на оригинал контента',
+                                    'type' => 'text',
+                                    'size' => 'normal',
+                                    'not null' => TRUE,
+                                ),
+                                'worked'                    => array(
+                                    'description'       => 'Worked or not&!',
+                                    'type'              => 'int',
+                                    'size'              => 'tiny',
+                                    'not null'          => TRUE,
+                                ),
+                                'data'           => array(
+                                    'description' => 'Data from E1(serialized)',
+                                    'type' => 'text',
+                                    'size' => 'medium',
+                                    'not null' => FALSE,
+                                ),
+                            ),
+                            'primary key' => array('e1rid'),
+  );  
+  return $schema;
+}
