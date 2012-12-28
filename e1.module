@@ -1,5 +1,7 @@
 <?php 
 define('qE1Imp','queueE1Import');
+define('qE1Grab','queueE1Grabber');
+
 function e1_entity_info(){
     $entities = array();
     $entities['e1_realty'] = array(
@@ -59,15 +61,16 @@ function e1_queueAddFromE1List(){
                 }                                                                                                                                                               
         //sleep(100);                                                                                                                                                           
     }
-    $cnt = count($rez);                                                                                                                                                 
+    $cnt = count($rez); 
+
     //Add grabbered content to Queue
     $queue = DrupalQueue::get(qE1Imp);
+    
     foreach($rez as $eGrub) 
-        $queue->createItem(array('url'=> 'http://www.e1.ru/business/realty/'.$e1id.'.html'));
+        $queue->createItem(array('url'=> 'http://www.e1.ru/business/realty/'.$eGrub.'.html','e1id' => $eGrub));
+    
     if($cnt>0)                                                                                                                                                             
         watchdog('E1_Spider', 'grabbered '.$cnt);                                                                                                                                                                                                                                                                             
-    
-    
 }
 
 //Add from E1 url of uniq realty URL's 
@@ -81,6 +84,10 @@ function e1_cron_queue_info(){
     'worker callback' => 'e1_import', 
     'time' => 60, 
   );
+  $queues[qE1Grab] = array(
+    'worker callback' => 'e1_grabber', 
+    'time' => 60, 
+  );
   return $queues;
 }
 
@@ -91,7 +98,83 @@ function e1_import($url){
     //$queue = DrupalQueue::get(qE1Imp);                                                                                                       
     //$queue->createQueue(); 
     //add 1 item
+   /* 
+    $query = new EntityFieldQuery();
+
+$query->entityCondition('entity_type', 'e1_realty')
+  ->propertyCondition('original', $url['e1id']);
+    $result = $query->execute();
+   */
+    $e1id = (empty($url['id'])?'4426792':$url['id']);
+    $e1url= (empty($url['url'])?'http://www.e1.ru/business/realty/4426792.html':$url['id']);
+    addHtmlParser();
+    $html = file_get_html($e1url);                                                                                                                                 
+    $hds = array('null1'=>'Количество смежных комнат:',                                                                                                                          
+            'field_rooms'=>'Кол-во комнат в квартире:',                                                                                                                                
+            'field_yardage'=>'Общая площадь, кв.м.',                                                                                                                                     
+            'field_price'=>'Цена:',                                                                                                                                                    
+            'Срок сдачи:',                                                                                                                                              
+            'Коммунальные платежи:',                                                                                                                                    
+            'Адрес:',                                                                                                                                                   
+            'Последнее изменение:',                                                                                                                                     
+            'Срок публикации, до:',                                                                                                                                     
+            'Этаж:',                                                                                                                                                    
+            'Сан узел:',                                                                                                                                                
+            'Мебель:',                                                                                                                                                  
+            'Телефон:',                                                                                                                                                 
+            'Лоджия:',                                                                                                                                                  
+            'Город:',                                                                                                                                                   
+            'Район:',                                                                                                                                                   
+            'Контактное лицо:',                                                                                                                                         
+            'Телефон:',                                                                                                                                                 
+            'Дополнительные сведения:'                                                                                                                                  
+        ); 
+    
+    foreach($html->find('body table tbody tr td table tbody tr td table tbody') as $tbody)
+        foreach($tbody->find('tr') as $tr){                                                                                                                             
+            $need = '';                                                                                                                                                 
+            foreach($tr->find('td') as $td){                                                                                                                            
+                $value = strip_tags(trim(str_replace('&nbsp;',' ',iconv('cp1251','utf-8',$td->plaintext))));                                                            
+                 if(in_array($value,$hds))                                                                                                                              
+                    $need = $value;                                                                                                                                     
+                elseif(!empty($need))                                                                                                                                   
+                    $rez[$need][] = $value;                                                                                                                             
+            }                                                                                                                                                           
+        }                                                                                                                                                               
+                                                                                                                                                                       
+    //zabiraem opisanie                                                                                                                                                 
+    foreach($html->find('body table tbody tr td table tbody') as $tbody){                                                                                               
+        $need = '';                                                                                                                                                     
+            foreach($tbody->find('tr') as $tr)                                                                                                                          
+                    foreach($tr->find('td') as $td){                                                                                                                    
+                            $value = strip_tags(trim(str_replace('&nbsp;',' ',iconv('cp1251','utf-8',$td->plaintext))));                                                
+                             if(in_array($value,$hds)&&empty($rez[$value]))                                                                                             
+                                    $need = $value;                                                                                                                     
+                            elseif(!empty($need))                                                                                                                       
+                                    $rez[$need][] = $value;                                                                                                             
+                    }                                                                                                                                                   
+    }
+    unset($html);
+    print_r($rez);
+    die();
+    $newNode = array();
+    $newNode['type'] = 'flats';
+    $newNode['title'] = $e1url;
+    
+    $qp = new StdClass();                                                                                                                                       
+    $qp->type = 'equipment';                                                                                                                                    
+    node_object_prepare($qp);                                                                                                                                   
+    $qp->nid = 0;                                                                                                                                               
+    
+    watchdog('E1_Grubber', 'Try to grab '.$url['url']);
     $nd = node_load(30001);
     $nd->body .= $url['url'];
     node_save($nd);
+}
+
+function e1_grabber($in){
+    
+    
+    
+    
 }
